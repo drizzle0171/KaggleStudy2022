@@ -59,7 +59,7 @@ while cap.isOpened():
             result, #result에 합성 -> orange copy
             np.full(left_eye_img.shape[:2], 255, left_eye_img.dtype),
             (100, 200),
-            cv2.MIXED_CLONE #이 옵션을 주면 알아서 잘 섞임
+            cv2.NORMAL_CLONE #이 옵션을 주면 알아서 잘 섞임
         )
         #속도가 좀 느림...
 
@@ -68,7 +68,7 @@ while cap.isOpened():
             result,
             np.full(right_eye_img.shape[:2], 255, right_eye_img.dtype),
             (250, 200),
-            cv2.MIXED_CLONE
+            cv2.NORMAL_CLONE
         )
 
         # mouth
@@ -87,7 +87,7 @@ while cap.isOpened():
             result,
             np.full(mouth_img.shape[:2], 255, mouth_img.dtype),
             (180, 320),
-            cv2.MIXED_CLONE
+            cv2.NORMAL_CLONE
         )
 
         # cv2.imshow('left', left_eye_img)

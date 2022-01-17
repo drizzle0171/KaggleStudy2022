@@ -17,7 +17,7 @@ hands = mp_hands.Hands(
     min_tracking_confidence=0.5)
 
 # Gesture recognition model
-file = np.genfromtxt('gesture_train_fy.csv', delimiter=',')
+file = np.genfromtxt('more/gesture_train.csv', delimiter=',')
 angle = file[:,:-1].astype(np.float32)
 label = file[:, -1].astype(np.float32)
 knn = cv2.ml.KNearest_create()
@@ -25,6 +25,14 @@ knn.train(angle, cv2.ml.ROW_SAMPLE, label)
 
 cap = cv2.VideoCapture(0)
 
+def click(event, x, y, flags, param):
+    global data, file
+    if event == cv2.EVENT_LBUTTONDOWN:
+        file = np.vstack((file, data))
+        print(file.shape)
+
+cv2.namedWindow('Dataset')
+cv2.setMouseCallback('Dataset', click)
 while cap.isOpened():
     ret, img = cap.read()
     if not ret:
@@ -59,21 +67,24 @@ while cap.isOpened():
 
             # Inference gesture
             data = np.array([angle], dtype=np.float32)
-            ret, results, neighbours, dist = knn.findNearest(data, 3)
-            idx = int(results[0][0])
+            data = np.append(data, 11)
+            # ret, results, neighbours, dist = knn.findNearest(data, 3)
+            # idx = int(results[0][0])
 
-            if idx == 11:
-                x1, y1 = tuple((joint.min(axis=0)[:2] * [img.shape[1], img.shape[0]] * 0.95).astype(int))
-                x2, y2 = tuple((joint.max(axis=0)[:2] * [img.shape[1], img.shape[0]] * 1.05).astype(int))
+            # if idx == 11:
+            #     x1, y1 = tuple((joint.min(axis=0)[:2] * [img.shape[1], img.shape[0]] * 0.95).astype(int))
+            #     x2, y2 = tuple((joint.max(axis=0)[:2] * [img.shape[1], img.shape[0]] * 1.05).astype(int))
 
-                fy_img = img[y1:y2, x1:x2].copy()
-                fy_img = cv2.resize(fy_img, dsize=None, fx=0.05, fy=0.05, interpolation=cv2.INTER_NEAREST)
-                fy_img = cv2.resize(fy_img, dsize=(x2 - x1, y2 - y1), interpolation=cv2.INTER_NEAREST)
+            #     fy_img = img[y1:y2, x1:x2].copy()
+            #     fy_img = cv2.resize(fy_img, dsize=None, fx=0.05, fy=0.05, interpolation=cv2.INTER_NEAREST)
+            #     fy_img = cv2.resize(fy_img, dsize=(x2 - x1, y2 - y1), interpolation=cv2.INTER_NEAREST)
 
-                img[y1:y2, x1:x2] = fy_img
+            #     img[y1:y2, x1:x2] = fy_img
 
             # mp_drawing.draw_landmarks(img, res, mp_hands.HAND_CONNECTIONS)
 
-    cv2.imshow('Filter', img)
+    cv2.imshow('Dataset', img)
     if cv2.waitKey(1) == ord('q'):
         break
+
+np.savetxt('gesture_train_fy.csv', file, delimiter=',')
